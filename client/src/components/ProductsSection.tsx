@@ -3,24 +3,11 @@
  * Premium presentation: collection names, materials, atmosphere lead
  * All images: warm European luxury showroom world
  */
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase, type Product } from "@/lib/supabase";
 
 const categories = ["Të Gjitha", "Dhoma Ndenje", "Dhoma Gjumi", "Kuzhinë", "Komoda"];
-
-function useInView(ref: React.RefObject<Element>) {
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
-      { threshold: 0.1 }
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [ref]);
-  return inView;
-}
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("sq-AL", { minimumFractionDigits: 0 }).format(price);
@@ -47,6 +34,7 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
             key={src + i}
             src={src}
             alt={alt}
+            loading={i === 0 ? "eager" : "lazy"}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-105 ${
               i === current ? "opacity-100" : "opacity-0"
             }`}
@@ -56,7 +44,6 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
 
       {images.length > 1 && (
         <>
-          {/* Prev/Next arrows — visible on hover */}
           <button
             onClick={prev}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1C1410]/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-[#1C1410]/80"
@@ -72,7 +59,6 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
             <ChevronRight size={16} />
           </button>
 
-          {/* Dots */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
             {images.map((_, i) => (
               <button
@@ -97,8 +83,6 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
 export default function ProductsSection() {
   const [activeCategory, setActiveCategory] = useState("Të Gjitha");
   const [products, setProducts] = useState<Product[]>([]);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(sectionRef as React.RefObject<Element>);
 
   useEffect(() => {
     supabase
@@ -115,12 +99,10 @@ export default function ProductsSection() {
     : products.filter((p) => p.category === activeCategory);
 
   return (
-    <section id="produktet" className="py-24 bg-[#FAF7F2]" ref={sectionRef}>
+    <section id="produktet" className="py-24 bg-[#FAF7F2]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section Header */}
-        <div
-          className={`mb-16 transition-all duration-700 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-        >
+        <div className="mb-16">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-px bg-[#C9A84C]" />
             <span
@@ -150,10 +132,7 @@ export default function ProductsSection() {
         </div>
 
         {/* Category Tabs */}
-        <div
-          className={`flex flex-wrap gap-2 mb-14 transition-all duration-700 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          style={{ transitionDelay: "150ms" }}
-        >
+        <div className="flex flex-wrap gap-2 mb-14">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -172,7 +151,7 @@ export default function ProductsSection() {
 
         {/* Editorial Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((product, i) => {
+          {filtered.map((product) => {
             const images = product.images && product.images.length > 0
               ? product.images
               : [product.image];
@@ -180,10 +159,7 @@ export default function ProductsSection() {
             return (
               <div
                 key={product.id}
-                className={`group relative overflow-hidden transition-all duration-700 ${
-                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                }`}
-                style={{ transitionDelay: `${200 + i * 80}ms` }}
+                className="group relative overflow-hidden"
               >
                 {/* Image Container */}
                 <div className="relative overflow-hidden aspect-[4/3]">
@@ -248,10 +224,7 @@ export default function ProductsSection() {
         </div>
 
         {/* CTA */}
-        <div
-          className={`text-center mt-16 transition-all duration-700 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          style={{ transitionDelay: "700ms" }}
-        >
+        <div className="text-center mt-16">
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="w-16 h-px bg-[#E8E0D4]" />
             <p
