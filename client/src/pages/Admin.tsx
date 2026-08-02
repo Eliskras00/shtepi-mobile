@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase, type Product, type GalleryImage } from "@/lib/supabase";
+import { compressImage } from "@/lib/imageCompress";
 
 const categories = ["Dhoma Ndenje", "Dhoma Gjumi", "Kuzhinë", "Komoda"];
 const galleryCategories = ["Dhoma Ndenje", "Dhoma Gjumi", "Kuzhinë", "Komoda", "Ngrënie", "Të Tjera"];
@@ -366,6 +367,7 @@ function ProductsTab() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -401,17 +403,26 @@ function ProductsTab() {
     };
   }, [pendingImages]);
 
-  function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const newPending: PendingProductImage[] = files.map((file) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+    setCompressing(true);
+    try {
+      const compressedFiles = await Promise.all(files.map((file) => compressImage(file)));
 
-    setPendingImages((prev) => [...prev, ...newPending]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+      const newPending: PendingProductImage[] = compressedFiles.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      setPendingImages((prev) => [...prev, ...newPending]);
+    } catch (err) {
+      alert("Gabim gjatë përpunimit të fotove: " + (err as Error).message);
+    } finally {
+      setCompressing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   function removePendingImage(index: number) {
@@ -686,8 +697,10 @@ function ProductsTab() {
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1C1410" strokeOpacity="0.4" strokeWidth="1.5">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
-            <span className="text-sm text-[#1C1410]/60">Kliko për të zgjedhur një ose disa foto</span>
-            <span className="text-xs text-[#1C1410]/40">JPG, PNG deri në disa MB</span>
+            <span className="text-sm text-[#1C1410]/60">
+              {compressing ? "Duke përpunuar fotot..." : "Kliko për të zgjedhur një ose disa foto"}
+            </span>
+            <span className="text-xs text-[#1C1410]/40">JPG, PNG deri në disa MB — do të komprimohen automatikisht</span>
             <input
               id="product-file-input"
               ref={fileInputRef}
@@ -695,6 +708,7 @@ function ProductsTab() {
               accept="image/*"
               multiple
               onChange={handleFilesChange}
+              disabled={compressing}
               className="hidden"
             />
           </label>
@@ -732,7 +746,7 @@ function ProductsTab() {
 
         <button
           type="submit"
-          disabled={uploading}
+          disabled={uploading || compressing}
           className="w-full bg-[#1C1410] text-[#C9A84C] py-3.5 rounded-md font-medium tracking-wide hover:bg-[#C9A84C] hover:text-[#1C1410] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {uploading ? (
@@ -831,6 +845,7 @@ function GalleryTab() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [pending, setPending] = useState<PendingImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -855,23 +870,32 @@ function GalleryTab() {
     };
   }, [pending]);
 
-  function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const newPending: PendingImage[] = files.map((file, i) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      alt: groupName
-        ? files.length > 1
-          ? `${groupName} ${pending.length + i + 1}`
-          : groupName
-        : file.name,
-      span: spanOptions[0].value,
-    }));
+    setCompressing(true);
+    try {
+      const compressedFiles = await Promise.all(files.map((file) => compressImage(file)));
 
-    setPending((prev) => [...prev, ...newPending]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+      const newPending: PendingImage[] = compressedFiles.map((file, i) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        alt: groupName
+          ? files.length > 1
+            ? `${groupName} ${pending.length + i + 1}`
+            : groupName
+          : file.name,
+        span: spanOptions[0].value,
+      }));
+
+      setPending((prev) => [...prev, ...newPending]);
+    } catch (err) {
+      alert("Gabim gjatë përpunimit të fotove: " + (err as Error).message);
+    } finally {
+      setCompressing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   function removePending(index: number) {
@@ -1006,8 +1030,10 @@ function GalleryTab() {
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1C1410" strokeOpacity="0.4" strokeWidth="1.5">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
-            <span className="text-sm text-[#1C1410]/60">Kliko për të zgjedhur një ose disa foto</span>
-            <span className="text-xs text-[#1C1410]/40">JPG, PNG deri në disa MB</span>
+            <span className="text-sm text-[#1C1410]/60">
+              {compressing ? "Duke përpunuar fotot..." : "Kliko për të zgjedhur një ose disa foto"}
+            </span>
+            <span className="text-xs text-[#1C1410]/40">JPG, PNG deri në disa MB — do të komprimohen automatikisht</span>
             <input
               id="gallery-file-input"
               ref={fileInputRef}
@@ -1015,6 +1041,7 @@ function GalleryTab() {
               accept="image/*"
               multiple
               onChange={handleFilesChange}
+              disabled={compressing}
               className="hidden"
             />
           </label>
@@ -1069,7 +1096,7 @@ function GalleryTab() {
 
         <button
           type="submit"
-          disabled={uploading || pending.length === 0}
+          disabled={uploading || compressing || pending.length === 0}
           className="w-full bg-[#1C1410] text-[#C9A84C] py-3.5 rounded-md font-medium tracking-wide hover:bg-[#C9A84C] hover:text-[#1C1410] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {uploading ? (
