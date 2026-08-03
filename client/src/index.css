@@ -201,5 +201,26 @@
       padding-right: 2rem;
       max-width: 1280px; /* Standard content width */
     }
+  } 
+
+
+@keyframes splash-zoom {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
   }
+  60% {
+    transform: scale(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-splash-zoom {
+  animation: splash-zoom 1.8s ease-in-out forwards;
+  animation-delay: 1.2s;
+}
 }
