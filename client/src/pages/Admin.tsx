@@ -470,7 +470,7 @@ function ProductsTab() {
     );
     pendingImages.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     setPendingImages([]);
-    formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // S'e zhvendosim më view-in te fillimi i formularit — mbetet aty ku ka klikuar përdoruesi
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -600,10 +600,10 @@ function ProductsTab() {
           </div>
           <div>
             <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
-              Materiali
+              Përmbajtja
             </label>
             <input
-              placeholder="p.sh. Kadife · Dru Arrë"
+              placeholder="p.sh. Divan + 2 Kolltuqe + Tavolinë"
               value={form.material}
               onChange={(e) => setForm({ ...form, material: e.target.value })}
               className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
