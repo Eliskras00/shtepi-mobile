@@ -48,7 +48,7 @@ function ProductImageCarousel({
 
   return (
     <>
-      <div className="relative h-full w-full overflow-hidden bg-[#E8E0D4]">
+      <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] bg-[#E8E0D4]">
         {images.map((src, index) => (
           <img
             key={`${src}-${index}`}
@@ -58,7 +58,7 @@ function ProductImageCarousel({
             onLoad={() =>
               setLoadedImages((previous) => new Set(previous).add(index))
             }
-            className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${
+            className={`absolute inset-0 h-full w-full rounded-[2.5rem] object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${
               index === current && loadedImages.has(index)
                 ? "opacity-100"
                 : "opacity-0"
@@ -67,7 +67,7 @@ function ProductImageCarousel({
         ))}
 
         {!loadedImages.has(current) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#E8E0D4]">
+          <div className="absolute inset-0 flex items-center justify-center rounded-[2.5rem] bg-[#E8E0D4]">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C9A84C]/40 border-t-[#C9A84C]" />
           </div>
         )}
@@ -219,10 +219,10 @@ export default function ProductsSection() {
             const productTag = getProductText(product, "tag");
 
             return (
-              <article key={product.id} className="group relative overflow-hidden">
-                <div className="relative aspect-[4/3] overflow-hidden">
+              <article key={product.id} className="group relative overflow-hidden rounded-[2.5rem]">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[2.5rem]">
                   <ProductImageCarousel images={images} alt={productName} />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1C1410]/80 via-[#1C1410]/10 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] bg-gradient-to-t from-[#1C1410]/80 via-[#1C1410]/10 to-transparent" />
 
                   {productTag && (
                     <span
