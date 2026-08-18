@@ -7,17 +7,27 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export interface Product {
   id: number;
+
+  // Albanian content
   name: string;
-  category: string;
   material: string;
-  price: number | null;
   description: string;
+  tag: string;
+
+  // English content
+  name_en?: string | null;
+  material_en?: string | null;
+  description_en?: string | null;
+  tag_en?: string | null;
+
+  category: string;
+  price: number | null;
   image: string;
   images: string[] | null;
-  tag: string;
   featured: boolean;
   created_at?: string;
 }
+
 export type GalleryImage = {
   id: string;
   src: string;

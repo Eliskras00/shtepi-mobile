@@ -1,130 +1,175 @@
-/**
- * SHTËPI MOBILE — About Section
- * Split layout: text left, image right with decorative elements
- */
 import { useRef, useEffect, useState } from "react";
 import { Award, Users, Truck, Wrench } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-function useInView(ref: React.RefObject<Element>) {
+function useInView(ref: React.RefObject<Element | null>) {
   const [inView, setInView] = useState(false);
+
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setInView(true);
+      },
       { threshold: 0.15 }
     );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
+
+    observer.observe(element);
+    return () => observer.disconnect();
   }, [ref]);
+
   return inView;
 }
 
-const features = [
-  { icon: Award, title: "Cilësi e Garantuar", desc: "Materialet më të mira evropiane" },
-  { icon: Truck, title: "Dërgim Falas", desc: "Dërgim dhe montim falas në Prizren" },
-  { icon: Wrench, title: "Montim Profesional", desc: "Ekip i specializuar montimi" },
-  { icon: Users, title: "Shërbim Personal", desc: "Konsultim falas me dizajner" },
+const featureContent = [
+  {
+    icon: Award,
+    al: { title: "Cilësi e Garantuar", desc: "Materialet më të mira evropiane" },
+    en: { title: "Guaranteed Quality", desc: "The finest European materials" },
+  },
+  {
+    icon: Truck,
+    al: { title: "Dërgim Falas", desc: "Dërgim dhe montim falas në Prizren" },
+    en: { title: "Free Delivery", desc: "Free delivery and assembly in Prizren" },
+  },
+  {
+    icon: Wrench,
+    al: { title: "Montim Profesional", desc: "Ekip i specializuar montimi" },
+    en: { title: "Professional Assembly", desc: "A specialized assembly team" },
+  },
+  {
+    icon: Users,
+    al: { title: "Shërbim Personal", desc: "Konsultim falas me dizajner" },
+    en: { title: "Personal Service", desc: "Free consultation with a designer" },
+  },
 ];
 
 export default function AboutSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(sectionRef as React.RefObject<Element>);
+  const inView = useInView(sectionRef);
 
   return (
-    <section id="rreth-nesh" className="py-24 bg-[#FAF7F2]" ref={sectionRef}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left: Text */}
+    <section
+      id="rreth-nesh"
+      ref={sectionRef}
+      className="bg-[#FAF7F2] py-16 sm:py-20 lg:py-24"
+    >
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-12">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div
-            className={`transition-all duration-700 ${inView ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+            className={`transition-all duration-700 ${
+              inView
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-8 opacity-0"
+            }`}
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-px bg-[#C9A84C]" />
+            <div className="mb-4 flex items-center gap-3">
+              <div className="h-px w-8 bg-[#C9A84C]" />
               <span
-                className="text-[#8B6914] text-xs tracking-[0.25em] uppercase"
+                className="text-xs uppercase tracking-[0.2em] text-[#8B6914] sm:tracking-[0.25em]"
                 style={{ fontFamily: "'Lato', sans-serif" }}
               >
-                Historia Jonë
+                {t("Historia Jonë", "Our Story")}
               </span>
             </div>
+
             <h2
-              className="text-[#1C1410] text-4xl md:text-5xl font-semibold mb-6 leading-tight"
+              className="mb-5 text-3xl font-semibold leading-tight text-[#1C1410] sm:mb-6 sm:text-4xl md:text-5xl"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Pasion për
+              {t("Pasion për", "A passion for")}
               <br />
-              <em className="text-[#8B6914] not-italic">artizanatin</em> e mobiljes
+              <em className="not-italic text-[#8B6914]">
+                {t("artizanatin", "furniture craftsmanship")}
+              </em>{" "}
+              {t("e mobiljes", "")}
             </h2>
+
             <p
-              className="text-[#1C1410]/60 text-base leading-relaxed mb-6"
+              className="mb-5 text-base leading-relaxed text-[#1C1410]/60 sm:mb-6"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              Shtëpi Mobile është themeluar me një vizion të thjeshtë: t'u sjellim
-              familjarëve kosovarë mobilje të cilësisë evropiane me çmime të
-              arsyeshme. Me mbi 15 vjet eksperiencë, kemi transformuar qindra
-              shtëpi në Prizren dhe rrethinë.
-            </p>
-            <p
-              className="text-[#1C1410]/60 text-base leading-relaxed mb-10"
-              style={{ fontFamily: "'Lato', sans-serif" }}
-            >
-              Çdo mobilje që shesim vjen me garanci cilësie dhe shërbim pas
-              shitjes. Besojmë se shtëpia juaj meriton vetëm të mirën.
+              {t(
+                "Shtëpi Mobile është themeluar me një vizion të thjeshtë: t'u sjellim familjarëve kosovarë mobilje të cilësisë evropiane me çmime të arsyeshme. Me mbi 15 vjet eksperiencë, kemi transformuar qindra shtëpi në Prizren dhe rrethinë.",
+                "Shtëpi Mobile was founded with a simple vision: to bring European-quality furniture to Kosovar families at fair prices. With over 15 years of experience, we have transformed hundreds of homes in Prizren and the surrounding area."
+              )}
             </p>
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-6">
-              {features.map((f, i) => (
-                <div
-                  key={f.title}
-                  className={`transition-all duration-500 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-                  style={{ transitionDelay: `${300 + i * 80}ms` }}
-                >
-                  <div className="w-10 h-10 bg-[#E8E0D4] flex items-center justify-center mb-3">
-                    <f.icon size={18} className="text-[#8B6914]" />
+            <p
+              className="mb-8 text-base leading-relaxed text-[#1C1410]/60 sm:mb-10"
+              style={{ fontFamily: "'Lato', sans-serif" }}
+            >
+              {t(
+                "Çdo mobilje që shesim vjen me garanci cilësie dhe shërbim pas shitjes. Besojmë se shtëpia juaj meriton vetëm të mirën.",
+                "Every piece of furniture we sell comes with a quality guarantee and after-sales service. We believe your home deserves nothing but the best."
+              )}
+            </p>
+
+            <div className="grid grid-cols-2 gap-5 sm:gap-6">
+              {featureContent.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <div
+                    key={feature.al.title}
+                    className={`transition-all duration-500 ${
+                      inView
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-4 opacity-0"
+                    }`}
+                    style={{ transitionDelay: `${300 + index * 80}ms` }}
+                  >
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center bg-[#E8E0D4]">
+                      <Icon size={18} className="text-[#8B6914]" />
+                    </div>
+                    <h4
+                      className="mb-1 text-sm font-semibold text-[#1C1410]"
+                      style={{ fontFamily: "'Lato', sans-serif" }}
+                    >
+                      {t(feature.al.title, feature.en.title)}
+                    </h4>
+                    <p
+                      className="text-xs leading-relaxed text-[#1C1410]/50"
+                      style={{ fontFamily: "'Lato', sans-serif" }}
+                    >
+                      {t(feature.al.desc, feature.en.desc)}
+                    </p>
                   </div>
-                  <h4
-                    className="text-[#1C1410] text-sm font-semibold mb-1"
-                    style={{ fontFamily: "'Lato', sans-serif" }}
-                  >
-                    {f.title}
-                  </h4>
-                  <p
-                    className="text-[#1C1410]/50 text-xs leading-relaxed"
-                    style={{ fontFamily: "'Lato', sans-serif" }}
-                  >
-                    {f.desc}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* Right: Image with decorative frame */}
           <div
-            className={`relative transition-all duration-700 ${inView ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}
+            className={`relative transition-all duration-700 ${
+              inView
+                ? "translate-x-0 opacity-100"
+                : "translate-x-8 opacity-0"
+            }`}
             style={{ transitionDelay: "200ms" }}
           >
-            <div className="relative">
-              {/* Decorative border */}
-              <div className="absolute -top-4 -right-4 w-full h-full border border-[#C9A84C]/30 z-0" />
-             <img
-  src="/showroom.png"
-  alt="Showroom Mobile Home"
-  className="relative z-10 w-full aspect-[4/5] object-cover object-top"
-/>
-              {/* Gold accent badge */}
-              <div className="absolute -bottom-6 -left-6 z-20 bg-[#1C1410] p-6 w-40">
+            <div className="relative mx-2 sm:mx-4 lg:mx-0">
+              <div className="absolute -right-3 -top-3 z-0 h-full w-full border border-[#C9A84C]/30 sm:-right-4 sm:-top-4" />
+              <img
+                src="/showroom.png"
+                alt={t("Showroom Shtëpi Mobile", "Shtëpi Mobile showroom")}
+                className="relative z-10 aspect-[4/5] w-full object-cover object-top"
+                loading="lazy"
+              />
+              <div className="absolute -bottom-5 -left-3 z-20 w-36 bg-[#1C1410] p-5 sm:-bottom-6 sm:-left-6 sm:w-40 sm:p-6">
                 <div
-                  className="text-[#C9A84C] text-4xl font-semibold"
+                  className="text-3xl font-semibold text-[#C9A84C] sm:text-4xl"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   15+
                 </div>
                 <div
-                  className="text-white/60 text-xs tracking-[0.1em] uppercase mt-1"
+                  className="mt-1 text-[10px] uppercase tracking-[0.08em] text-white/60 sm:text-xs sm:tracking-[0.1em]"
                   style={{ fontFamily: "'Lato', sans-serif" }}
                 >
-                  Vjet Eksperiencë
+                  {t("Vjet Eksperiencë", "Years of Experience")}
                 </div>
               </div>
             </div>

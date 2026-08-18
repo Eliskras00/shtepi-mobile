@@ -1,54 +1,74 @@
-/**
- * SHTËPI MOBILE — Products Section (Editorial Collection Catalogue)
- * Premium presentation: collection names, materials, atmosphere lead
- * All images: warm European luxury showroom world
- */
-import { useState, useEffect } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase, type Product } from "@/lib/supabase";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const categories = ["Të Gjitha", "Dhoma Ndenje", "Dhoma Gjumi", "Kuzhinë", "Komoda"];
+type ProductWithTranslations = Product & {
+  name_en?: string | null;
+  description_en?: string | null;
+  material_en?: string | null;
+  tag_en?: string | null;
+  category_en?: string | null;
+};
+
+const categoryOptions = [
+  { value: "Të Gjitha", al: "Të Gjitha", en: "All" },
+  { value: "Dhoma Ndenje", al: "Dhoma Ndenje", en: "Living Room" },
+  { value: "Dhoma Gjumi", al: "Dhoma Gjumi", en: "Bedroom" },
+  { value: "Kuzhinë", al: "Kuzhinë", en: "Kitchen" },
+  { value: "Komoda", al: "Komoda", en: "Dressers" },
+];
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat("sq-AL", { minimumFractionDigits: 0 }).format(price);
+  return new Intl.NumberFormat("de-DE", {
+    minimumFractionDigits: 0,
+  }).format(price);
 }
 
-function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }) {
+function ProductImageCarousel({
+  images,
+  alt,
+}: {
+  images: string[];
+  alt: string;
+}) {
+  const { t } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
-  function prev(e: React.MouseEvent) {
-    e.stopPropagation();
-    setCurrent((c) => (c === 0 ? images.length - 1 : c - 1));
+  function prev(event: MouseEvent<HTMLButtonElement>) {
+    event.stopPropagation();
+    setCurrent((index) => (index === 0 ? images.length - 1 : index - 1));
   }
 
-  function next(e: React.MouseEvent) {
-    e.stopPropagation();
-    setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
-  }
-
-  function handleImageLoad(index: number) {
-    setLoadedImages((prev) => new Set(prev).add(index));
+  function next(event: MouseEvent<HTMLButtonElement>) {
+    event.stopPropagation();
+    setCurrent((index) => (index === images.length - 1 ? 0 : index + 1));
   }
 
   return (
     <>
-      <div className="relative w-full h-full overflow-hidden bg-[#E8E0D4]">
-        {images.map((src, i) => (
+      <div className="relative h-full w-full overflow-hidden bg-[#E8E0D4]">
+        {images.map((src, index) => (
           <img
-            key={src + i}
+            key={`${src}-${index}`}
             src={src}
             alt={alt}
-            loading={i === 0 ? "eager" : "lazy"}
-            onLoad={() => handleImageLoad(i)}
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${
-              i === current && loadedImages.has(i) ? "opacity-100" : "opacity-0"
+            loading={index === 0 ? "eager" : "lazy"}
+            onLoad={() =>
+              setLoadedImages((previous) => new Set(previous).add(index))
+            }
+            className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${
+              index === current && loadedImages.has(index)
+                ? "opacity-100"
+                : "opacity-0"
             }`}
           />
         ))}
+
         {!loadedImages.has(current) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#E8E0D4] animate-pulse">
-            <div className="w-8 h-8 border-2 border-[#C9A84C]/40 border-t-[#C9A84C] rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-[#E8E0D4]">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C9A84C]/40 border-t-[#C9A84C]" />
           </div>
         )}
       </div>
@@ -56,32 +76,35 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
       {images.length > 1 && (
         <>
           <button
+            type="button"
             onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1C1410]/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-[#1C1410]/80"
-            aria-label="Foto e mëparshme"
+            aria-label={t("Foto e mëparshme", "Previous photo")}
+            className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#1C1410]/50 text-white opacity-0 transition-opacity duration-300 hover:bg-[#1C1410]/80 group-hover:opacity-100"
           >
             <ChevronLeft size={16} />
           </button>
           <button
+            type="button"
             onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1C1410]/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-[#1C1410]/80"
-            aria-label="Foto tjetër"
+            aria-label={t("Foto tjetër", "Next photo")}
+            className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#1C1410]/50 text-white opacity-0 transition-opacity duration-300 hover:bg-[#1C1410]/80 group-hover:opacity-100"
           >
             <ChevronRight size={16} />
           </button>
 
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
-            {images.map((_, i) => (
+          <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 gap-1.5">
+            {images.map((_, index) => (
               <button
-                key={i}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrent(i);
+                key={index}
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setCurrent(index);
                 }}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  i === current ? "bg-[#C9A84C] w-4" : "bg-white/60"
+                aria-label={t(`Foto ${index + 1}`, `Photo ${index + 1}`)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === current ? "w-4 bg-[#C9A84C]" : "w-1.5 bg-white/60"
                 }`}
-                aria-label={`Foto ${i + 1}`}
               />
             ))}
           </div>
@@ -92,121 +115,141 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
 }
 
 export default function ProductsSection() {
+  const { lang, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("Të Gjitha");
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithTranslations[]>([]);
 
   useEffect(() => {
-    supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data) setProducts(data);
-      });
+    let active = true;
+
+    async function loadProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!active) return;
+      if (!error && data) setProducts(data as ProductWithTranslations[]);
+    }
+
+    loadProducts();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const filtered = activeCategory === "Të Gjitha"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const filtered =
+    activeCategory === "Të Gjitha"
+      ? products
+      : products.filter((product) => product.category === activeCategory);
+
+  function getProductText(
+    product: ProductWithTranslations,
+    field: "name" | "description" | "material" | "tag"
+  ) {
+    const albanian = product[field] ?? "";
+    const english = product[`${field}_en`];
+    return lang === "en" && english ? english : albanian;
+  }
 
   return (
-    <section id="produktet" className="py-24 bg-[#FAF7F2]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        {/* Section Header */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-px bg-[#C9A84C]" />
+    <section id="produktet" className="bg-[#FAF7F2] py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-12">
+        <div className="mb-10 sm:mb-12 lg:mb-16">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px w-8 bg-[#C9A84C]" />
             <span
-              className="text-[#8B6914] text-xs tracking-[0.25em] uppercase"
+              className="text-xs uppercase tracking-[0.2em] text-[#8B6914] sm:tracking-[0.25em]"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              Koleksionet Tona
+              {t("Koleksionet Tona", "Our Collections")}
             </span>
           </div>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end md:gap-6">
             <h2
-              className="text-[#1C1410] text-4xl md:text-5xl font-semibold leading-tight"
+              className="text-3xl font-semibold leading-tight text-[#1C1410] sm:text-4xl md:text-5xl"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Produkte për çdo
+              {t("Produkte për çdo", "Products for every")}
               <br />
-              <em className="text-[#8B6914] not-italic">hapësirë</em>
+              <em className="not-italic text-[#8B6914]">
+                {t("hapësirë", "space")}
+              </em>
             </h2>
             <p
-              className="text-[#1C1410]/55 text-sm max-w-sm leading-relaxed"
+              className="max-w-sm text-sm leading-relaxed text-[#1C1410]/55"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              Çdo koleksion është projektuar me kujdes të veçantë, duke kombinuar
-              materialet më cilësore me dizajnin bashkëkohor.
+              {t(
+                "Çdo koleksion është projektuar me kujdes të veçantë, duke kombinuar materialet më cilësore me dizajnin bashkëkohor.",
+                "Every collection is carefully designed, combining the finest materials with contemporary design."
+              )}
             </p>
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 mb-14">
-          {categories.map((cat) => (
+        <div className="mb-10 flex flex-wrap gap-2 sm:mb-14">
+          {categoryOptions.map((category) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2 text-xs tracking-[0.12em] uppercase transition-all duration-300 ${
-                activeCategory === cat
+              key={category.value}
+              type="button"
+              onClick={() => setActiveCategory(category.value)}
+              className={`px-4 py-2 text-xs uppercase tracking-[0.1em] transition-all duration-300 sm:px-5 sm:tracking-[0.12em] ${
+                activeCategory === category.value
                   ? "bg-[#1C1410] text-[#C9A84C]"
                   : "border border-[#E8E0D4] text-[#1C1410]/50 hover:border-[#C9A84C] hover:text-[#8B6914]"
               }`}
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              {cat}
+              {t(category.al, category.en)}
             </button>
           ))}
         </div>
 
-        {/* Editorial Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {filtered.map((product) => {
-            const images = product.images && product.images.length > 0
-              ? product.images
-              : [product.image];
+            const images =
+              product.images && product.images.length > 0
+                ? product.images
+                : [product.image];
+            const productName = getProductText(product, "name");
+            const productDescription = getProductText(product, "description");
+            const productMaterial = getProductText(product, "material");
+            const productTag = getProductText(product, "tag");
 
             return (
-              <div
-                key={product.id}
-                className="group relative overflow-hidden"
-              >
-                {/* Image Container */}
-                <div className="relative overflow-hidden aspect-[4/3]">
-                  <ProductImageCarousel images={images} alt={product.name} />
+              <article key={product.id} className="group relative overflow-hidden">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <ProductImageCarousel images={images} alt={productName} />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1C1410]/80 via-[#1C1410]/10 to-transparent" />
 
-                  {/* Gradient overlay always present */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1C1410]/80 via-[#1C1410]/10 to-transparent pointer-events-none" />
-
-                  {/* Tag */}
-                  {product.tag && (
+                  {productTag && (
                     <span
-                      className="absolute top-4 right-4 bg-[#C9A84C] text-[#1C1410] text-[9px] tracking-[0.2em] uppercase px-3 py-1.5 font-bold"
+                      className="absolute right-4 top-4 bg-[#C9A84C] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[#1C1410]"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     >
-                      {product.tag}
+                      {productTag}
                     </span>
                   )}
 
-                  {/* Content on image bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
+                  <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                     <div
-                      className="text-[#C9A84C] text-[9px] tracking-[0.25em] uppercase mb-1.5"
+                      className="mb-1.5 text-[9px] uppercase tracking-[0.25em] text-[#C9A84C]"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     >
-                      {product.material}
+                      {productMaterial}
                     </div>
-                    <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="mb-2 flex items-start justify-between gap-3">
                       <h3
-                        className="text-white text-xl font-semibold leading-tight"
+                        className="text-lg font-semibold leading-tight text-white sm:text-xl"
                         style={{ fontFamily: "'Playfair Display', serif" }}
                       >
-                        {product.name}
+                        {productName}
                       </h3>
                       {product.price != null && (
                         <span
-                          className="text-[#C9A84C] text-lg font-semibold whitespace-nowrap"
+                          className="whitespace-nowrap text-base font-semibold text-[#C9A84C] sm:text-lg"
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
                           {formatPrice(product.price)} €
@@ -214,44 +257,56 @@ export default function ProductsSection() {
                       )}
                     </div>
                     <p
-                      className="text-white/65 text-xs leading-relaxed mb-4"
+                      className="mb-4 text-xs leading-relaxed text-white/65"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     >
-                      {product.description}
+                      {productDescription}
                     </p>
                     <button
-                      onClick={() => document.querySelector("#kontakti")?.scrollIntoView({ behavior: "smooth" })}
-                      className="pointer-events-auto flex items-center gap-2 text-[#C9A84C] text-xs tracking-[0.12em] uppercase font-medium hover:gap-4 transition-all duration-300 group/btn"
+                      type="button"
+                      onClick={() =>
+                        document
+                          .querySelector("#kontakti")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="pointer-events-auto flex items-center gap-2 text-xs font-medium uppercase tracking-[0.1em] text-[#C9A84C] transition-all duration-300 hover:gap-4 group/btn sm:tracking-[0.12em]"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     >
-                      Kërko Informacion
-                      <ArrowRight size={12} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
+                      {t("Kërko Informacion", "Request Information")}
+                      <ArrowRight
+                        size={12}
+                        className="transition-transform duration-300 group-hover/btn:translate-x-1"
+                      />
                     </button>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-16">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="w-16 h-px bg-[#E8E0D4]" />
+        <div className="mt-12 text-center sm:mt-16">
+          <div className="mb-6 flex items-center justify-center gap-3 sm:gap-4">
+            <div className="h-px w-10 bg-[#E8E0D4] sm:w-16" />
             <p
-              className="text-[#1C1410]/45 text-xs tracking-[0.15em] uppercase"
+              className="text-center text-[10px] uppercase tracking-[0.1em] text-[#1C1410]/45 sm:text-xs sm:tracking-[0.15em]"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              Mbi 200 modele disponueshme
+              {t("Mbi 200 modele disponueshme", "Over 200 models available")}
             </p>
-            <div className="w-16 h-px bg-[#E8E0D4]" />
+            <div className="h-px w-10 bg-[#E8E0D4] sm:w-16" />
           </div>
           <button
-            onClick={() => document.querySelector("#kontakti")?.scrollIntoView({ behavior: "smooth" })}
-            className="px-10 py-4 border border-[#8B6914] text-[#8B6914] text-xs tracking-[0.15em] uppercase font-medium hover:bg-[#8B6914] hover:text-white transition-all duration-300 active:scale-[0.97]"
+            type="button"
+            onClick={() =>
+              document
+                .querySelector("#kontakti")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="border border-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-[#8B6914] transition-all duration-300 hover:bg-[#8B6914] hover:text-white active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
             style={{ fontFamily: "'Lato', sans-serif" }}
           >
-            Konsultohuni me Dizajnerin
+            {t("Konsultohuni me Dizajnerin", "Consult with a Designer")}
           </button>
         </div>
       </div>

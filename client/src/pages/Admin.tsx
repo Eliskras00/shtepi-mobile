@@ -371,11 +371,15 @@ function ProductsTab() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({
     name: "",
+    name_en: "",
     category: categories[0],
     material: "",
+    material_en: "",
     price: "",
     description: "",
+    description_en: "",
     tag: "",
+    tag_en: "",
     featured: false,
   });
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -444,11 +448,15 @@ function ProductsTab() {
     setEditingId(null);
     setForm({
       name: "",
+      name_en: "",
       category: categories[0],
       material: "",
+      material_en: "",
       price: "",
       description: "",
+      description_en: "",
       tag: "",
+      tag_en: "",
       featured: false,
     });
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -458,11 +466,15 @@ function ProductsTab() {
     setEditingId(product.id);
     setForm({
       name: product.name,
+      name_en: product.name_en || "",
       category: product.category,
       material: product.material,
+      material_en: product.material_en || "",
       price: product.price != null ? String(product.price) : "",
       description: product.description || "",
+      description_en: product.description_en || "",
       tag: product.tag || "",
+      tag_en: product.tag_en || "",
       featured: product.featured || false,
     });
     setExistingImages(
@@ -507,11 +519,15 @@ function ProductsTab() {
 
       const payload = {
         name: form.name,
+        name_en: form.name_en,
         category: form.category,
         material: form.material,
+        material_en: form.material_en,
         price: form.price ? Number(form.price) : null,
         description: form.description,
+        description_en: form.description_en,
         tag: form.tag,
+        tag_en: form.tag_en,
         featured: form.featured,
         image: allImages[0],
         images: allImages,
@@ -584,6 +600,17 @@ function ProductsTab() {
           </div>
           <div>
             <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
+              Emri në anglisht
+            </label>
+            <input
+              placeholder="e.g. Venezia Collection"
+              value={form.name_en}
+              onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+              className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
               Kategoria
             </label>
             <select
@@ -606,6 +633,17 @@ function ProductsTab() {
               placeholder="p.sh. Divan + 2 Kolltuqe + Tavolinë"
               value={form.material}
               onChange={(e) => setForm({ ...form, material: e.target.value })}
+              className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
+              Përmbajtja në anglisht
+            </label>
+            <input
+              placeholder="e.g. Sofa + 2 Armchairs + Table"
+              value={form.material_en}
+              onChange={(e) => setForm({ ...form, material_en: e.target.value })}
               className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
             />
           </div>
@@ -634,6 +672,17 @@ function ProductsTab() {
               className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
             />
           </div>
+          <div>
+            <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
+              Etiketa në anglisht (opsionale)
+            </label>
+            <input
+              placeholder="e.g. Bestseller"
+              value={form.tag_en}
+              onChange={(e) => setForm({ ...form, tag_en: e.target.value })}
+              className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all"
+            />
+          </div>
           <div className="col-span-full">
             <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
               Përshkrimi
@@ -642,6 +691,18 @@ function ProductsTab() {
               placeholder="Përshkrimi i produktit..."
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all resize-none"
+              rows={3}
+            />
+          </div>
+          <div className="col-span-full">
+            <label className="block text-xs font-medium text-[#1C1410]/60 uppercase tracking-wider mb-1.5">
+              Përshkrimi në anglisht
+            </label>
+            <textarea
+              placeholder="Product description in English..."
+              value={form.description_en}
+              onChange={(e) => setForm({ ...form, description_en: e.target.value })}
               className="w-full border border-[#E8E0D4] rounded-md px-3 py-2.5 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 transition-all resize-none"
               rows={3}
             />
