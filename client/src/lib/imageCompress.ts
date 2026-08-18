@@ -2,7 +2,7 @@
  * Kompreson dhe ndryshon madhësinë e një fotoje në browser, para upload-it.
  * Redukton madhësinë e skedarit ndjeshëm pa humbje të dukshme cilësie.
  */
-export async function compressImage(file: File, maxWidth = 1600, quality = 0.8): Promise<File> {
+export async function compressImage(file: File, maxWidth = 1600, quality = 0.75): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();

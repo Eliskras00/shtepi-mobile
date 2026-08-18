@@ -15,6 +15,7 @@ function formatPrice(price: number) {
 
 function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   const [current, setCurrent] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   function prev(e: React.MouseEvent) {
     e.stopPropagation();
@@ -26,20 +27,30 @@ function ProductImageCarousel({ images, alt }: { images: string[]; alt: string }
     setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
   }
 
+  function handleImageLoad(index: number) {
+    setLoadedImages((prev) => new Set(prev).add(index));
+  }
+
   return (
     <>
-      <div className="relative w-full h-full overflow-hidden">
+      <div className="relative w-full h-full overflow-hidden bg-[#E8E0D4]">
         {images.map((src, i) => (
           <img
             key={src + i}
             src={src}
             alt={alt}
             loading={i === 0 ? "eager" : "lazy"}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-105 ${
-              i === current ? "opacity-100" : "opacity-0"
+            onLoad={() => handleImageLoad(i)}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${
+              i === current && loadedImages.has(i) ? "opacity-100" : "opacity-0"
             }`}
           />
         ))}
+        {!loadedImages.has(current) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#E8E0D4] animate-pulse">
+            <div className="w-8 h-8 border-2 border-[#C9A84C]/40 border-t-[#C9A84C] rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       {images.length > 1 && (

@@ -3,7 +3,7 @@
  * Full-bleed image, asymmetric text left, scroll indicator
  * Dark gradient overlay for text contrast
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 export default function HeroSection() {
@@ -21,12 +21,15 @@ export default function HeroSection() {
   return (
     <section id="ballina" className="relative h-screen min-h-[600px] overflow-hidden">
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-[#1C1410]">
         <img
-  src="/hero.jpeg"
-  alt="Dhomë ndenje luksoze"
-  className="w-full h-full object-cover"
-/>
+          src="/hero.jpeg"
+          alt="Dhomë ndenje luksoze"
+          className="w-full h-full object-cover"
+          fetchPriority="high"
+  
+          decoding="sync"
+        />
         {/* Multi-layer gradient for depth */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
