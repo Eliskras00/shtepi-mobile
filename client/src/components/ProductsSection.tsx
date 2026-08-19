@@ -11,14 +11,6 @@ type ProductWithTranslations = Product & {
   category_en?: string | null;
 };
 
-const categoryOptions = [
-  { value: "Të Gjitha", al: "Të Gjitha", en: "All" },
-  { value: "Dhoma Ndenje", al: "Dhoma Ndenje", en: "Living Room" },
-  { value: "Dhoma Gjumi", al: "Dhoma Gjumi", en: "Bedroom" },
-  { value: "Kuzhinë", al: "Kuzhinë", en: "Kitchen" },
-  { value: "Komoda", al: "Komoda", en: "Dressers" },
-];
-
 function formatPrice(price: number) {
   return new Intl.NumberFormat("de-DE", {
     minimumFractionDigits: 0,
@@ -116,8 +108,8 @@ function ProductImageCarousel({
 
 export default function ProductsSection() {
   const { lang, t } = useLanguage();
-  const [activeCategory, setActiveCategory] = useState("Të Gjitha");
   const [products, setProducts] = useState<ProductWithTranslations[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -138,10 +130,7 @@ export default function ProductsSection() {
     };
   }, []);
 
-  const filtered =
-    activeCategory === "Të Gjitha"
-      ? products
-      : products.filter((product) => product.category === activeCategory);
+  const visibleProducts = showAll ? products : products.slice(0, 6);
 
   function getProductText(
     product: ProductWithTranslations,
@@ -189,26 +178,8 @@ export default function ProductsSection() {
           </div>
         </div>
 
-        <div className="mb-10 flex flex-wrap gap-2 sm:mb-14">
-          {categoryOptions.map((category) => (
-            <button
-              key={category.value}
-              type="button"
-              onClick={() => setActiveCategory(category.value)}
-              className={`px-4 py-2 text-xs uppercase tracking-[0.1em] transition-all duration-300 sm:px-5 sm:tracking-[0.12em] ${
-                activeCategory === category.value
-                  ? "bg-[#1C1410] text-[#C9A84C]"
-                  : "border border-[#E8E0D4] text-[#1C1410]/50 hover:border-[#C9A84C] hover:text-[#8B6914]"
-              }`}
-              style={{ fontFamily: "'Lato', sans-serif" }}
-            >
-              {t(category.al, category.en)}
-            </button>
-          ))}
-        </div>
-
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {filtered.map((product) => {
+          {visibleProducts.map((product) => {
             const images =
               product.images && product.images.length > 0
                 ? product.images
@@ -292,22 +263,38 @@ export default function ProductsSection() {
               className="text-center text-[10px] uppercase tracking-[0.1em] text-[#1C1410]/45 sm:text-xs sm:tracking-[0.15em]"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              {t("Mbi 200 modele disponueshme", "Over 200 models available")}
+              {showAll
+                ? t("Të gjitha produktet", "All products")
+                : t("6 produkte të zgjedhura", "6 featured products")}
             </p>
             <div className="h-px w-10 bg-[#E8E0D4] sm:w-16" />
           </div>
-          <button
-            type="button"
-            onClick={() =>
-              document
-                .querySelector("#kontakti")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
-            className="border border-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-[#8B6914] transition-all duration-300 hover:bg-[#8B6914] hover:text-white active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
-            style={{ fontFamily: "'Lato', sans-serif" }}
-          >
-            {t("Konsultohuni me Dizajnerin", "Consult with a Designer")}
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {products.length > 6 && (
+              <button
+                type="button"
+                onClick={() => setShowAll((value) => !value)}
+                className="border border-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-[#8B6914] transition-all duration-300 hover:bg-[#8B6914] hover:text-white active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
+                style={{ fontFamily: "'Lato', sans-serif" }}
+              >
+                {showAll
+                  ? t("Shfaq më pak", "Show less")
+                  : t("Shiko të gjitha produktet", "View all products")}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .querySelector("#kontakti")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="border border-[#8B6914] bg-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-white transition-all duration-300 hover:bg-transparent hover:text-[#8B6914] active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
+              style={{ fontFamily: "'Lato', sans-serif" }}
+            >
+              {t("Konsultohuni me Dizajnerin", "Consult with a Designer")}
+            </button>
+          </div>
         </div>
       </div>
     </section>
