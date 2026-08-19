@@ -11,6 +11,13 @@ type ProductWithTranslations = Product & {
   category_en?: string | null;
 };
 
+const categoryOptions = [
+  { value: "Dhoma Ndenje", al: "Dhoma Ndenje", en: "Living Room" },
+  { value: "Dhoma Gjumi", al: "Dhoma Gjumi", en: "Bedroom" },
+  { value: "Kuzhinë", al: "Kuzhinë", en: "Kitchen" },
+  { value: "Komoda", al: "Komoda", en: "Dressers" },
+];
+
 function formatPrice(price: number) {
   return new Intl.NumberFormat("de-DE", {
     minimumFractionDigits: 0,
@@ -108,8 +115,8 @@ function ProductImageCarousel({
 
 export default function ProductsSection() {
   const { lang, t } = useLanguage();
+  const [activeCategory, setActiveCategory] = useState("Dhoma Ndenje");
   const [products, setProducts] = useState<ProductWithTranslations[]>([]);
-  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -129,8 +136,6 @@ export default function ProductsSection() {
       active = false;
     };
   }, []);
-
-  const visibleProducts = showAll ? products : products.slice(0, 6);
 
   function getProductText(
     product: ProductWithTranslations,
@@ -178,8 +183,53 @@ export default function ProductsSection() {
           </div>
         </div>
 
+        <div className="mb-10 grid grid-cols-2 gap-3 sm:mb-12 sm:grid-cols-4 sm:gap-4">
+          {categoryOptions.map((category) => {
+            const count = products.filter((product) => product.category === category.value).length;
+            const active = activeCategory === category.value;
+
+            return (
+              <button
+                key={category.value}
+                type="button"
+                onClick={() => setActiveCategory(category.value)}
+                className={`rounded-2xl border px-3 py-4 text-center transition-all duration-300 sm:rounded-3xl sm:px-4 sm:py-5 ${
+                  active
+                    ? "border-[#1C1410] bg-[#1C1410] text-[#C9A84C] shadow-lg"
+                    : "border-[#E8E0D4] bg-white text-[#1C1410]/60 hover:border-[#C9A84C] hover:text-[#8B6914]"
+                }`}
+              >
+                <span
+                  className="block text-[10px] font-medium uppercase tracking-[0.08em] sm:text-xs sm:tracking-[0.12em]"
+                  style={{ fontFamily: "'Lato', sans-serif" }}
+                >
+                  {t(category.al, category.en)}
+                </span>
+                <span className={`mt-1 block text-[10px] ${active ? "text-white/60" : "text-[#1C1410]/35"}`}>
+                  {count} {t("produkte", "products")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mb-6 flex items-center justify-between">
+          <h3
+            className="text-xl font-semibold text-[#1C1410] sm:text-2xl"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {t(
+              categoryOptions.find((category) => category.value === activeCategory)?.al || activeCategory,
+              categoryOptions.find((category) => category.value === activeCategory)?.en || activeCategory
+            )}
+          </h3>
+          <span className="text-xs uppercase tracking-[0.1em] text-[#1C1410]/40">
+            {products.filter((product) => product.category === activeCategory).length} {t("produkte", "products")}
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {visibleProducts.map((product) => {
+          {products.filter((product) => product.category === activeCategory).map((product) => {
             const images =
               product.images && product.images.length > 0
                 ? product.images
@@ -263,38 +313,22 @@ export default function ProductsSection() {
               className="text-center text-[10px] uppercase tracking-[0.1em] text-[#1C1410]/45 sm:text-xs sm:tracking-[0.15em]"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
-              {showAll
-                ? t("Të gjitha produktet", "All products")
-                : t("6 produkte të zgjedhura", "6 featured products")}
+              {t("Zgjidhni një kategori për të parë produktet", "Choose a category to view the products")}
             </p>
             <div className="h-px w-10 bg-[#E8E0D4] sm:w-16" />
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {products.length > 6 && (
-              <button
-                type="button"
-                onClick={() => setShowAll((value) => !value)}
-                className="border border-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-[#8B6914] transition-all duration-300 hover:bg-[#8B6914] hover:text-white active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
-                style={{ fontFamily: "'Lato', sans-serif" }}
-              >
-                {showAll
-                  ? t("Shfaq më pak", "Show less")
-                  : t("Shiko të gjitha produktet", "View all products")}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() =>
-                document
-                  .querySelector("#kontakti")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="border border-[#8B6914] bg-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-white transition-all duration-300 hover:bg-transparent hover:text-[#8B6914] active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
-              style={{ fontFamily: "'Lato', sans-serif" }}
-            >
-              {t("Konsultohuni me Dizajnerin", "Consult with a Designer")}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .querySelector("#kontakti")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="border border-[#8B6914] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.12em] text-[#8B6914] transition-all duration-300 hover:bg-[#8B6914] hover:text-white active:scale-[0.97] sm:px-10 sm:py-4 sm:tracking-[0.15em]"
+            style={{ fontFamily: "'Lato', sans-serif" }}
+          >
+            {t("Konsultohuni me Dizajnerin", "Consult with a Designer")}
+          </button>
         </div>
       </div>
     </section>
